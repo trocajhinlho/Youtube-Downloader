@@ -21,13 +21,21 @@ export default class YoutubeDownloaderService {
     const rawUrl = url.toString();
     const videoDetails = await this.getVideoDetails(rawUrl);
 
-    const downloadPath = join(this.dir, "file.mp3");
-    const req = ytdl(rawUrl, { filter: "audioonly" });
-    const buffer: Uint8Array[] = [];
+    return new Promise(async (resolve, reject) => {
+      const downloadPath = join(this.dir, "file.mp3");
+      const req = ytdl(rawUrl, { filter: "audioonly" });
 
-    req.on("");
+      const bufferBytes: Uint8Array[] = [];
 
-    return videoDetails;
+      req.on("data", (data: Uint8Array) => bufferBytes.push(data));
+
+      req.on("end", () => {
+        const buffer = Buffer.concat(bufferBytes);
+        fs.writeFile(downloadPath, buffer, "binary", () => {
+          resolve(videoDetails);
+        });
+      });
+    });
   }
 
   private async getVideoDetails(url: string): Promise<VideoDetails> {
@@ -39,6 +47,7 @@ export default class YoutubeDownloaderService {
       thumbnailUrl: info.thumbnail_url,
       author: info.videoDetails.author.name,
       uploadDate: info.videoDetails.uploadDate,
+      contentLength: videoFormat.contentLength,
     };
   }
 }
