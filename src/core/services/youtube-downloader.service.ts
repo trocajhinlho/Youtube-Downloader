@@ -1,6 +1,7 @@
 import ytdl from "@distube/ytdl-core";
 import fs from "fs";
 import { join } from "path";
+import sanitizeFilename from "../helpers/sanitize-filename";
 import { VideoDetails } from "../types/video-details.interface";
 
 export default class YoutubeDownloaderService {
@@ -21,20 +22,14 @@ export default class YoutubeDownloaderService {
     const rawUrl = url.toString();
     const videoDetails = await this.getVideoDetails(rawUrl);
 
-    return new Promise(async (resolve, reject) => {
-      const downloadPath = join(this.dir, "file.mp3");
-      const req = ytdl(rawUrl, { filter: "audioonly" });
+    const downloadPath = join(this.dir, sanitizeFilename(videoDetails.title) + ".mp3");
 
-      const bufferBytes: Uint8Array[] = [];
-
-      req.on("data", (data: Uint8Array) => bufferBytes.push(data));
-
-      req.on("end", () => {
-        const buffer = Buffer.concat(bufferBytes);
-        fs.writeFile(downloadPath, buffer, "binary", () => {
+    return new Promise((resolve, _) => {
+      ytdl(rawUrl, { filter: "audioonly" })
+        .pipe(fs.createWriteStream(downloadPath))
+        .on("finish", () => {
           resolve(videoDetails);
         });
-      });
     });
   }
 
