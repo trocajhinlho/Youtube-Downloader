@@ -4,8 +4,8 @@
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node-dev --respawn --watch src ./src/index.ts",
-    "ts": "ts-node-dev ./src/index.ts"
+    "dev": "ts-node --respawn --watch src ./src/index.ts",
+    "ts": "ts-node ./src/index.ts"
   },
   "repository": {
     "type": "git",
