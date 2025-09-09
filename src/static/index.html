@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet" />
+    <title>Youtube Downloader</title>
+  </head>
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      font-family: "Open Sans", sans-serif;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 560px;
+      background-color: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.04),
+        rgba(255, 255, 255, 0.02)
+      );
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      padding: 28px;
+      backdrop-filter: blur(6px);
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: clamp(1.4rem, 2.5vw + 1rem, 2rem);
+      letter-spacing: 0.4px;
+    }
+
+    p.helper {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .form {
+      display: flex;
+      gap: 12px;
+    }
+
+    input {
+      flex: 1;
+      padding: 14px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      outline: none;
+      font-size: 1rem;
+      transition:
+        border 0.2s,
+        box-shadow 0.2s,
+        background 0.2s;
+    }
+
+    input::placeholder {
+      color: #9ca3af;
+    }
+
+    input:focus {
+      border-color: rgba(239, 68, 68, 0.7);
+      box-shadow: var(--ring);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    button {
+      padding: 14px 18px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      background: var(--accent);
+      color: rgb(255, 0, 0);
+      cursor: pointer;
+      transition:
+        transform 0.06s ease,
+        background 0.2s ease,
+        box-shadow 0.2s;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+  </style>
+  <body>
+    <main class="card">
+      <h1>Youtube Downloader</h1>
+      <p class="helper">Cole o link abaixo</p>
+
+      <form class="form" action="/download" method="post">
+        <label class="sr-only" for="url">URL do video</label>
+        <input
+          name="videoUrl"
+          id="videoUrl"
+          type="videoUrl"
+          placeholder="https://www.youtube.com/watch?=sdsa....."
+          required />
+        <button type="submit">Baixar</button>
+      </form>
+    </main>
+  </body>
+  <script>
+    document.querySelector("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.getElementById("videoUrl");
+      alert(input.value);
+      fetch("/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Define o tipo de conteúdo como JSON
+        },
+        body: JSON.stringify({ videoUrl: input.value }),
+      })
+        .then((r) => r.json())
+        .then((data) => console.log(data));
+    });
+  </script>
+</html>
