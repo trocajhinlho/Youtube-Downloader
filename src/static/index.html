@@ -24,6 +24,15 @@
       padding: 0 16px;
     }
 
+    body {
+      margin: 0;
+      font-family: ui-sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 10% - 10%, #1f2937, transparent),
+        radial-gradient(1200px 800px at 110% 10%, #111827, transparent), var(--bg);
+    }
+
     .card {
       width: 100%;
       max-width: 560px;
@@ -94,6 +103,12 @@
         background 0.2s ease,
         box-shadow 0.2s;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+    button:hover {
+      background: var(--accent-hover);
+    }
+    button:active {
+      transform: translateY(1px);
     }
   </style>
   <body>
