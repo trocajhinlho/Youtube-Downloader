@@ -33,8 +33,8 @@ export default class YoutubeDownloaderService {
     });
   }
 
-  private async getVideoDetails(url: string): Promise<VideoDetails> {
-    const info = await ytdl.getInfo(url);
+  public async getVideoDetails(videoId: string): Promise<VideoDetails> {
+    const info = await ytdl.getInfo("https://youtube.com/watch?v=" + videoId);
     const videoFormat = ytdl.chooseFormat(info.formats, { filter: "audioonly" });
 
     return {
