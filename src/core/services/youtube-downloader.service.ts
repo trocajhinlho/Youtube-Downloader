@@ -1,36 +1,20 @@
 import ytdl from "@distube/ytdl-core";
-import fs from "fs";
-import { join } from "path";
 import sanitizeFilename from "../helpers/sanitize-filename";
+import { DownloadResult } from "../types/download-result.interface";
 import { VideoDetails } from "../types/video-details.interface";
 
 export default class YoutubeDownloaderService {
-  private readonly dir: string;
+  public constructor() {}
 
-  public constructor(dir: string) {
-    console.log("Veryfing download directory...");
-    if (!fs.existsSync(dir)) {
-      console.log("Creating required dir... ");
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    this.dir = dir;
-  }
+  public async download(videoId: string): Promise<DownloadResult> {
+    const url = "https://youtube.com/watch?v=" + videoId;
+    const { contentLength, filename } = await this.getVideoDetails(videoId);
 
-  public async download(url: URL) {
-    // TODO: validate URL
-
-    const rawUrl = url.toString();
-    const videoDetails = await this.getVideoDetails(rawUrl);
-
-    const downloadPath = join(this.dir, sanitizeFilename(videoDetails.title) + ".mp3");
-
-    return new Promise((resolve, _) => {
-      ytdl(rawUrl, { filter: "audioonly" })
-        .pipe(fs.createWriteStream(downloadPath))
-        .on("finish", () => {
-          resolve(videoDetails);
-        });
-    });
+    return {
+      filename,
+      contentLength,
+      readableStream: ytdl(url, { filter: "audioonly" }),
+    };
   }
 
   public async getVideoDetails(videoId: string): Promise<VideoDetails> {
@@ -40,6 +24,7 @@ export default class YoutubeDownloaderService {
     return {
       title: info.videoDetails.title,
       thumbnailUrl: info.thumbnail_url,
+      filename: sanitizeFilename(info.videoDetails.title) + ".mp3",
       author: info.videoDetails.author.name,
       uploadDate: info.videoDetails.uploadDate,
       contentLength: videoFormat.contentLength,

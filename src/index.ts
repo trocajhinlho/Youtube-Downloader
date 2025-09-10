@@ -18,19 +18,23 @@ app.get("/health", (req: Request, res: Response) => {
 });
 
 app.get("/video-details", extractVideoIdMiddleware, async (req: Request, res: Response) => {
-  const videoUrl = res.locals.videoId;
+  const videoId = res.locals.videoId;
 
-  const videoDetails = await downloaderService.getVideoDetails(videoUrl);
+  const videoDetails = await downloaderService.getVideoDetails(videoId);
   return res.json({ data: videoDetails });
 });
 
-app.post("/download", async (req: Request, res: Response) => {
+app.get("/download", extractVideoIdMiddleware, async (req: Request, res: Response) => {
   console.log("Received");
-  console.log(req.body);
 
-  const url = new URL(req.body.videoUrl);
-  const videoDetails = await downloaderService.download(url);
-  return res.json(videoDetails);
+  const videoId = res.locals.videoId;
+  const { readableStream, contentLength, filename } = await downloaderService.download(videoId);
+
+  res.setHeader("Content-Length", contentLength);
+  res.setHeader("Content-Type", "application/octet-stream");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+  return readableStream.pipe(res);
 });
 
 const port = 3000;
