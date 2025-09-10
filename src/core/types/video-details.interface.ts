@@ -3,6 +3,8 @@ export interface VideoDetails {
   title: string;
   thumbnailUrl: string;
   author: string;
-  uploadDate: string;
+  publishDate: string;
+  duration: string;
+  fileSize: string;
   contentLength: string;
 }

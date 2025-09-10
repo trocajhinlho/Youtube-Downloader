@@ -1,4 +1,6 @@
 import ytdl from "@distube/ytdl-core";
+import { formatBytes } from "../helpers/format-bytes";
+import { formatDuration } from "../helpers/format-duration";
 import sanitizeFilename from "../helpers/sanitize-filename";
 import { DownloadResult } from "../types/download-result.interface";
 import { VideoDetails } from "../types/video-details.interface";
@@ -26,8 +28,10 @@ export default class YoutubeDownloaderService {
       thumbnailUrl: info.thumbnail_url,
       filename: sanitizeFilename(info.videoDetails.title) + ".mp3",
       author: info.videoDetails.author.name,
-      uploadDate: info.videoDetails.uploadDate,
+      publishDate: info.videoDetails.publishDate,
       contentLength: videoFormat.contentLength,
+      fileSize: formatBytes(videoFormat.contentLength),
+      duration: formatDuration(info.videoDetails.lengthSeconds),
     };
   }
 }
