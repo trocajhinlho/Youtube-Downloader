@@ -1,5 +1,4 @@
 export interface VideoDetails {
-  filename: string;
   title: string;
   thumbnailUrl: string;
   author: string;

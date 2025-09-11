@@ -10,11 +10,11 @@ export default class YoutubeDownloaderService {
 
   public async download(videoId: string): Promise<DownloadResult> {
     const url = "https://youtube.com/watch?v=" + videoId;
-    const { contentLength, filename } = await this.getVideoDetails(videoId);
+    const { info, videoFormat } = await this.getVideoRawDetails(videoId);
 
     return {
-      filename,
-      contentLength,
+      filename: sanitizeFilename(info.videoDetails.title) + ".mp3",
+      contentLength: videoFormat.contentLength,
       readableStream: ytdl(url, { filter: "audioonly" }),
     };
   }
@@ -22,18 +22,23 @@ export default class YoutubeDownloaderService {
   public async getVideoDetails(videoId: string): Promise<VideoDetails> {
     const getLargestThumbnail = (thumbnails: YtdlThumbnail[]) => thumbnails[thumbnails.length - 1];
 
-    const info = await ytdl.getInfo("https://youtube.com/watch?v=" + videoId);
-    const videoFormat = ytdl.chooseFormat(info.formats, { filter: "audioonly" });
+    const url = "https://youtube.com/watch?v=" + videoId;
+    const { info, videoFormat } = await this.getVideoRawDetails(url);
 
     return {
       title: info.videoDetails.title,
       thumbnailUrl: getLargestThumbnail(info.videoDetails.thumbnails).url,
-      filename: sanitizeFilename(info.videoDetails.title) + ".mp3",
       author: info.videoDetails.author.name,
       publishDate: info.videoDetails.publishDate,
       contentLength: videoFormat.contentLength,
       fileSize: formatBytes(videoFormat.contentLength),
       duration: formatDuration(info.videoDetails.lengthSeconds),
     };
+  }
+
+  private async getVideoRawDetails(videoUrl: string) {
+    const info = await ytdl.getInfo(videoUrl);
+    const videoFormat = ytdl.chooseFormat(info.formats, { filter: "audioonly" });
+    return { info, videoFormat };
   }
 }
