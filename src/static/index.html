@@ -199,7 +199,7 @@
   <script>
     function downloadVideo(e) {
       const getFilenameFromHeaders = (headers) => {
-        headers.get("Content-Disposition").split('filename="')[1].replace(/"/g, "");
+        return headers.get("Content-Disposition").split('filename="')[1].replace(/"/g, "");
       };
 
       e?.preventDefault();
