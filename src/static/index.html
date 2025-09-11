@@ -194,21 +194,40 @@
         </button>
       </form>
     </main>
+    <a hidden href="#" download id="downloadLink"></a>
   </body>
   <script>
-    document.querySelector("form").addEventListener("submit", (event) => {
-      event.preventDefault();
+    function downloadVideo(e) {
+      const getFilenameFromHeaders = (headers) => {
+        headers.get("Content-Disposition").split('filename="')[1].replace(/"/g, "");
+      };
+
+      e?.preventDefault();
       const input = document.getElementById("videoUrl");
-      alert(input.value);
-      fetch("/download", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json", // Define o tipo de conteúdo como JSON
-        },
-        body: JSON.stringify({ videoUrl: input.value }),
-      })
-        .then((r) => r.json())
-        .then((data) => console.log(data));
-    });
+      const url = "/download?url=" + encodeURIComponent(input.value);
+
+      fetch(url).then(async (data) => {
+        const blob = await data.blob();
+        const url = window.URL.createObjectURL(blob);
+        const downloadAnchor = document.getElementById("downloadLink");
+        downloadAnchor.download = getFilenameFromHeaders(data.headers);
+        downloadAnchor.href = url;
+        downloadAnchor.click();
+        window.URL.revokeObjectURL(url);
+      });
+    }
+
+    function fetchVideoDetails() {
+      const input = document.getElementById("videoUrl");
+      const url = "/video-details?url=" + encodeURIComponent(input.value);
+
+      fetch(url)
+        .then((res) => res.json())
+        .then((details) => {
+          console.log(details);
+        });
+    }
+
+    document.querySelector("form").addEventListener("submit", downloadVideo);
   </script>
 </html>
