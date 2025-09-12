@@ -165,12 +165,66 @@
         border: 0;
       }
 
+      .video-details {
+        margin-top: 20px;
+        display: flex;
+        gap: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      }
+
+      .video-details .thumb {
+        flex-shrink: 0;
+        width: 140px;
+        height: 80px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .video-details .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .video-details .info {
+        flex: 1;
+      }
+
+      .video-details h2 {
+        margin: 0 0 8px;
+        font-size: 1.2rem;
+        color: var(--text);
+      }
+
+      .video-details p {
+        margin: 4px 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .video-details strong {
+        color: var(--accent);
+      }
+
       @media (max-width: 480px) {
         .form {
           flex-direction: column;
         }
         button {
           width: 100%;
+        }
+        .video-details {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .video-details .thumb {
+          width: 100%;
+          height: auto;
         }
       }
     </style>
@@ -180,7 +234,7 @@
       <h1>YouTube downloader</h1>
       <p class="helper">Cole o link do vídeo do YouTube abaixo.</p>
 
-      <form class="form" action="/download" method="post">
+      <form class="form">
         <label class="sr-only" for="url">URL do vídeo</label>
         <input
           name="videoUrl"
@@ -193,23 +247,50 @@
           <i class="fa fa-youtube-play" aria-hidden="true"></i>
         </button>
       </form>
+      <!--  -->
+      <section id="videoDetails" class="video-details" hidden>
+        <div class="thumb">
+          <img id="videoThumbnail" src="" alt="Thumbnail do vídeo" />
+        </div>
+        <div class="info">
+          <h2 id="videoTitle">Título do vídeo</h2>
+          <p><strong>Autor:</strong> <span id="videoAuthor"></span></p>
+          <p><strong>Data de lançamento:</strong> <span id="videoDate"></span></p>
+          <p><strong>Duração:</strong> <span id="videoDuration"></span></p>
+          <p><strong>Tamanho:</strong> <span id="videoSize"></span></p>
+        </div>
+      </section>
     </main>
     <a hidden href="#" download id="downloadLink"></a>
   </body>
   <script>
+    const $ = document.querySelector;
+
+    /**
+     *
+     * @param {Date} date
+     */
+    function formatDate(date) {
+      // dd / mm / yyyy
+      date.getDate.padStart(2, "0");
+      date.getMonth;
+      date.getFullYear;
+      return;
+    }
+
     function downloadVideo(e) {
       const getFilenameFromHeaders = (headers) => {
         return headers.get("Content-Disposition").split('filename="')[1].replace(/"/g, "");
       };
 
       e?.preventDefault();
-      const input = document.getElementById("videoUrl");
+      const input = $("#videoUrl");
       const url = "/download?url=" + encodeURIComponent(input.value);
 
       fetch(url).then(async (data) => {
         const blob = await data.blob();
         const url = window.URL.createObjectURL(blob);
-        const downloadAnchor = document.getElementById("downloadLink");
+        const downloadAnchor = $("#downloadLink");
         downloadAnchor.download = getFilenameFromHeaders(data.headers);
         downloadAnchor.href = url;
         downloadAnchor.click();
@@ -217,17 +298,24 @@
       });
     }
 
-    function fetchVideoDetails() {
-      const input = document.getElementById("videoUrl");
+    function fetchVideoDetails(e) {
+      e.preventDefault();
+
+      const input = $("#videoUrl");
       const url = "/video-details?url=" + encodeURIComponent(input.value);
 
-      fetch(url)
-        .then((res) => res.json())
-        .then((details) => {
-          console.log(details);
-        });
+      fetch(url).then(async (response) => {
+        const { data } = await response.json();
+        if (response.status !== 200) return alert(data);
+
+        $("#videoAuthor").innerText = data.author;
+        $("#videoThumbnail").innerText = data.thumbnailUrl;
+        $("#videoDate").innerText = formatDate(data.publishDate);
+        $("#videoDuration").innerText = data.duration;
+        $("#videoSize").innerText = data.fileSize;
+      });
     }
 
-    document.querySelector("form").addEventListener("submit", downloadVideo);
+    $("form").addEventListener("submit", fetchVideoDetails);
   </script>
 </html>
