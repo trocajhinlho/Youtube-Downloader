@@ -251,7 +251,7 @@
             <p><strong>Tamanho:</strong> <span id="videoSize"></span></p>
           </div>
         </section>
-        <button type="submit">
+        <button id="downloadBtn">
           <span>Baixar</span>
           <i class="fa fa-youtube-play" aria-hidden="true"></i>
         </button>
@@ -291,12 +291,11 @@
       return `${day}/${month}/${year}`;
     }
 
-    function downloadVideo(e) {
+    function downloadVideo() {
       const getFilenameFromHeaders = (headers) => {
         return headers.get("Content-Disposition").split('filename="')[1].replace(/"/g, "");
       };
 
-      e?.preventDefault();
       const input = $("#videoUrl");
       const url = "/download?url=" + encodeURIComponent(input.value);
 
@@ -333,5 +332,7 @@
 
     const debouncedFetchVideoDetails = debounce(fetchVideoDetails, 1000);
     $("#videoUrl").addEventListener("keyup", debouncedFetchVideoDetails);
+
+    $("#downloadBtn").addEventListener("click", downloadVideo);
   </script>
 </html>
