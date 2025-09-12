@@ -20,19 +20,30 @@ app.get("/health", (_, res: Response) => {
 app.get("/video-details", extractVideoIdMiddleware, async (_, res: Response) => {
   const videoId = res.locals.videoId;
 
-  const videoDetails = await downloaderService.getVideoDetails(videoId);
-  return res.json({ data: videoDetails });
+  try {
+    const videoDetails = await downloaderService.getVideoDetails(videoId);
+    return res.json({ data: videoDetails });
+  } catch (error) {
+    return res.status(404).json({ data: (error as Error).message });
+  }
 });
 
 app.get("/download", extractVideoIdMiddleware, async (_, res: Response) => {
   const videoId = res.locals.videoId;
-  const { readableStream, contentLength, filename } = await downloaderService.download(videoId);
+  const downloadResult = await downloaderService.download(videoId);
+  if (downloadResult === null) return res.status(404);
 
-  res.setHeader("Content-Length", contentLength);
-  res.setHeader("Content-Type", "application/octet-stream");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  try {
+    const { readableStream, contentLength, filename } = downloadResult;
 
-  return readableStream.pipe(res);
+    res.setHeader("Content-Length", contentLength);
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    return readableStream.pipe(res);
+  } catch (error) {
+    return res.status(404).json({ data: (error as Error).message });
+  }
 });
 
 const port = 3000;

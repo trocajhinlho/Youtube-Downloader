@@ -37,8 +37,12 @@ export default class YoutubeDownloaderService {
   }
 
   private async getVideoRawDetails(videoUrl: string) {
-    const info = await ytdl.getInfo(videoUrl);
-    const videoFormat = ytdl.chooseFormat(info.formats, { filter: "audioonly" });
-    return { info, videoFormat };
+    try {
+      const info = await ytdl.getInfo(videoUrl);
+      const videoFormat = ytdl.chooseFormat(info.formats, { filter: "audioonly" });
+      return { info, videoFormat };
+    } catch (error) {
+      throw new Error("Video not found");
+    }
   }
 }
