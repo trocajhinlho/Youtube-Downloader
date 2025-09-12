@@ -52,6 +52,10 @@
         padding: 24px;
       }
 
+      .d-none {
+        display: none !important;
+      }
+
       .card {
         width: 100%;
         max-width: 800px;
@@ -234,7 +238,7 @@
           required />
       </form>
       <!--  -->
-      <section id="videoResult">
+      <section id="videoResult" class="d-none">
         <section id="videoDetails" class="video-details" hidden>
           <div class="thumb">
             <img id="videoThumbnail" src="" alt="Thumbnail do vídeo" />
@@ -257,8 +261,22 @@
   </body>
   <script>
     const $ = document.querySelector.bind(document);
+    HTMLElement.prototype.hide = function () {
+      this.classList.add("d-none");
+    };
+    HTMLElement.prototype.show = function () {
+      this.classList.remove("d-none");
+    };
 
-    function
+    function debounce(callback, wait) {
+      let timeoutId = null;
+      return (...args) => {
+        window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+          callback(...args);
+        }, wait);
+      };
+    }
 
     /**
      * @param {Date | string} date
@@ -293,16 +311,17 @@
       });
     }
 
-    function fetchVideoDetails(e) {
-      e.preventDefault();
-
+    function fetchVideoDetails() {
       const input = $("#videoUrl");
       const url = "/video-details?url=" + encodeURIComponent(input.value);
 
       fetch(url).then(async (response) => {
-        const { data } = await response.json();
-        if (response.status !== 200) return alert(data);
+        $("#videoResult").hide();
 
+        const { data, error } = await response.json();
+        if (response.status !== 200) return alert(error);
+
+        $("#videoResult").show();
         $("#videoTitle").innerText = data.title;
         $("#videoAuthor").innerText = data.author;
         $("#videoThumbnail").src = data.thumbnailUrl;
@@ -312,6 +331,7 @@
       });
     }
 
-    $("form").addEventListener("submit", fetchVideoDetails);
+    const debouncedFetchVideoDetails = debounce(fetchVideoDetails, 1000);
+    $("#videoUrl").addEventListener("keyup", debouncedFetchVideoDetails);
   </script>
 </html>
